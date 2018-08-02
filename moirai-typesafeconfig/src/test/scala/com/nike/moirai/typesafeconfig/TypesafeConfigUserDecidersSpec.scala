@@ -86,6 +86,24 @@ class TypesafeConfigUserDecidersSpec extends FunSpec with Matchers {
     }
   }
 
+  describe("A featureEnabled config decider") {
+    val resourceLoader = FileResourceLoaders.forClasspathResource("moirai.conf")
+
+    val featureFlagChecker = ConfigFeatureFlagChecker.forConfigSupplier[Config](
+      Suppliers.supplierAndThen(resourceLoader, TypesafeConfigReader.FROM_STRING),
+      TypesafeConfigDecider.FEATURE_ENABLED
+    )
+
+    it("should be enabled if the configuration say so") {
+      featureFlagChecker.isFeatureEnabled("coffee") shouldBe true
+      featureFlagChecker.isFeatureEnabled("tea") shouldBe false
+    }
+
+    it("should be disabled if the configuration does not specify anything") {
+      featureFlagChecker.isFeatureEnabled("water") shouldBe false
+    }
+  }
+
   describe("A custom dimension enabled valued config decider") {
     val resourceLoader = FileResourceLoaders.forClasspathResource("moirai.conf")
 
